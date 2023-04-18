@@ -43,17 +43,17 @@ async function getBlogs(req, res) {
     })
   }
 }
-const getPersonalBlogs = async (req, res) => {
-  const user = req.user;
-  try {
-    const result = await BLOG.find({ author: user?.id }).populate("author", "name _id profile").exec();
-    clog.warning({ status: "success", result })
-    res.json({ status: "success", result });
-  } catch (error) {
-    clog.error(error);
-    res.json({ status: "error", message: "Internal Server Error" });
-  }
-};
+// const getPersonalBlogs = async (req, res) => {
+//   const user = req.user;
+//   try {
+//     const result = await BLOG.find({ author: user?.id }).populate("author", "name _id profile").exec();
+//     clog.warning({ status: "success", result })
+//     res.json({ status: "success", result });
+//   } catch (error) {
+//     clog.error(error);
+//     res.json({ status: "error", message: "Internal Server Error" });
+//   }
+// };
 const postBlogs = async (req, res) => {
   const data = req.body;
   const file = req.file;
@@ -114,39 +114,39 @@ const postBlogs = async (req, res) => {
   }
   };
 }
-  const updateBlogs = async (req, res) => {
-    let img;
-    if (req.file) {
-      img = imgUrl(req.file);
-    }
-    const {
-      title,
-      description,
-      content,
-    } = req.body;
-    const { id } = req.query;
-    let result;
-    try {
-      if (id) {
-        const updateBLOG = await BLOG.findOneAndUpdate({ slug: id }, {
-          title,
-          slug,
-          description,
-          img,
-          content,
-        });
-        result = updateBLOG;
-        res.json({ status: "success", message: "Updated Successfully", result });
-      } else {
-        res.json({ status: "error", message: "BLOG ID not Found" });
-      }
-    } catch (error) {
-      res.json({ status: "error", message: "Internal Server Error" });
-    }
-    if (req.file) {
-      deleteImg(result.img);
-    }
-  };
+  // const updateBlogs = async (req, res) => {
+  //   let img;
+  //   if (req.file) {
+  //     img = imgUrl(req.file);
+  //   }
+  //   const {
+  //     title,
+  //     description,
+  //     content,
+  //   } = req.body;
+  //   const { id } = req.query;
+  //   let result;
+  //   try {
+  //     if (id) {
+  //       const updateBLOG = await BLOG.findOneAndUpdate({ slug: id }, {
+  //         title,
+  //         slug,
+  //         description,
+  //         img,
+  //         content,
+  //       });
+  //       result = updateBLOG;
+  //       res.json({ status: "success", message: "Updated Successfully", result });
+  //     } else {
+  //       res.json({ status: "error", message: "BLOG ID not Found" });
+  //     }
+  //   } catch (error) {
+  //     res.json({ status: "error", message: "Internal Server Error" });
+  //   }
+  //   if (req.file) {
+  //     deleteImg(result.img);
+  //   }
+  // };
   const deleteBlogs = async (req, res) => {
     const id = req.query.id;
     
@@ -169,25 +169,25 @@ const postBlogs = async (req, res) => {
       res.status(500).json({ message: "Internal Server Error" });
     }
   };
-  const getSingleBlog = async (req, res) => {
-    const {slug} = req.query;
-    console.log( "slug", slug, req.query);
-    try {
-      if (slug) {
-        const result = await BLOG.findOne({ slug: slug }).populate("author", "name _id profile");
-        if (result) {
-          res.json({ status: "success", message: "BLOG Found Successfully", result });
-        } else {
-          res.json({ status: "error", message: "BLOG Not Found" });
-        }
-      } else {
-        res.json({ status: "warning", message: "BLOG ID Not Found" });
-      }
-    } catch (error) {
-      clog.error(error);
-      res.json({ status: "success", message: "Internal Server Error" });
-    }
-  };
+  // const getSingleBlog = async (req, res) => {
+  //   const {slug} = req.query;
+  //   console.log( "slug", slug, req.query);
+  //   try {
+  //     if (slug) {
+  //       const result = await BLOG.findOne({ slug: slug }).populate("author", "name _id profile");
+  //       if (result) {
+  //         res.json({ status: "success", message: "BLOG Found Successfully", result });
+  //       } else {
+  //         res.json({ status: "error", message: "BLOG Not Found" });
+  //       }
+  //     } else {
+  //       res.json({ status: "warning", message: "BLOG ID Not Found" });
+  //     }
+  //   } catch (error) {
+  //     clog.error(error);
+  //     res.json({ status: "success", message: "Internal Server Error" });
+  //   }
+  // };
 
   async function getBlogBySlug(req, res) {
     console.log("Chhalu=========================");
@@ -240,12 +240,29 @@ const postBlogs = async (req, res) => {
     // }
   }
 
+async function getSearchBlogs(req, res){
+  const {search} = req.query;
+try{
+  const result = await BLOG.find({"title": { $regex: '.*' + search + '.*' }});
+  res.status(200).json({
+    status:"success",
+    message:"Data Searched successfully",
+    result:result
+  })
+}catch(err){
+  res.status(500).json({
+    status:"error",
+    message:"Internal Server Error",
+    
+  })
+
+}
+}
+
   module.exports = {
     getBlogs,
     postBlogs,
-    updateBlogs,
     deleteBlogs,
-    getSingleBlog,
-    getPersonalBlogs,
-    getBlogBySlug
+    getBlogBySlug,
+    getSearchBlogs
   };
