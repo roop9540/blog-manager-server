@@ -108,6 +108,7 @@ const postBlogs = async (req, res) => {
       return res.json({ status: "success", message: "BLOG Added Succesfully", result: savedBlog });
 
     } catch (err) {
+      console.log(err)
      return res.status(500).json({
       status: "error", message: "Internal Server Error"
      })
